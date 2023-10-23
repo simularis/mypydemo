@@ -27,6 +27,8 @@ a2 = Analysis(
 )
 MERGE((a1,'myscript','myscript'), (a2, 'mygooey','mygooey'))
 
+collectables = []
+
 for a,name,console in [(a1,'myscript',True), (a2,'mygooey',False)]:
     pyz = PYZ(a.pure)
     exe = EXE(
@@ -46,12 +48,21 @@ for a,name,console in [(a1,'myscript',True), (a2,'mygooey',False)]:
         codesign_identity=None,
         entitlements_file=None,
     )
-    coll = COLLECT(
-        exe,
-        a.binaries,
-        a.datas,
-        strip=False,
-        upx=True,
-        upx_exclude=[],
-        name=name,
-    )
+    # coll = COLLECT(
+    #     exe,
+    #     a.binaries,
+    #     a.datas,
+    #     strip=False,
+    #     upx=True,
+    #     upx_exclude=[],
+    #     name=name,
+    # )
+    collectables.extend([exe, a.binaries, a.zipfiles, a.datas])
+
+coll = COLLECT(
+    *collectables,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='mypydemo',
+)

@@ -1,6 +1,10 @@
 from argparse import ArgumentParser
-from tqdm import tqdm
 from time import sleep
+from pathlib import Path
+from hashlib import sha256
+from zipfile import ZipFile
+
+from tqdm import tqdm
 
 def say_hello(name: str):
     print("Hello, world.")
@@ -20,11 +24,74 @@ def bake_a_cake(duration: float, use_tqdm=True, **kwargs):
                 pbar.update(1)
     else:
         # Text only output mode for Gooey
+        from sys import stdout
         for i in range(100):
             sleep(duration / 100.)
             print(f"Overall progress: {i}/100")
+            # Gentle hint to Gooey to update progress bar
+            stdout.flush()
 
     print("Done baking.")
+
+def read_a_file(filename: Path, use_tqdm=True):
+    mylen = filename.stat().st_size
+    print(f"File '{filename}' has {mylen} bytes")
+    print("Computing SHA256 hashsum")
+    hash=sha256()
+    nbytes = 10000
+    if use_tqdm:
+        with tqdm(total=mylen) as pbar:
+            with filename.open('rb') as f:
+                mybytes = f.read(nbytes)
+                while len(mybytes) > 0:
+                    pbar.update(len(mybytes))
+                    hash.update(mybytes)
+                    mybytes = f.read(nbytes)
+    else:
+        # Text only output mode for Gooey
+        from sys import stdout
+        progress=0
+        with filename.open('rb') as f:
+            mybytes = f.read(nbytes)
+            while len(mybytes) > 0:
+                progress += len(mybytes)
+                hash.update(mybytes)
+                print(f"Overall progress: {progress}/{mylen}")
+                # Gentle hint to Gooey to update progress bar
+                stdout.flush()
+                mybytes = f.read(nbytes)
+    print(hash.hexdigest(),f"*{filename}")
+
+def read_file_in_zip(zipfilename: Path, innerfilename: str, use_tqdm=True):
+    with ZipFile(zipfilename) as zf:
+        zi = zf.getinfo(innerfilename)
+        mylen = zi.file_size
+        print(f"File '{innerfilename}' has {mylen} bytes")
+        print("Computing SHA256 hashsum")
+        hash=sha256()
+        nbytes = 10000
+        if use_tqdm:
+            with tqdm(total=mylen) as pbar:
+                with zf.open(innerfilename) as f:
+                    mybytes = f.read(nbytes)
+                    while len(mybytes) > 0:
+                        pbar.update(len(mybytes))
+                        hash.update(mybytes)
+                        mybytes = f.read(nbytes)
+        else:
+            # Text only output mode for Gooey
+            from sys import stdout
+            progress=0
+            with zf.open(innerfilename) as f:
+                mybytes = f.read(nbytes)
+                while len(mybytes) > 0:
+                    progress += len(mybytes)
+                    hash.update(mybytes)
+                    print(f"Overall progress: {progress}/{mylen}")
+                    # Gentle hint to Gooey to update progress bar
+                    stdout.flush()
+                    mybytes = f.read(nbytes)
+        print(hash.hexdigest(),f"*{innerfilename}")
 
 def main(inargs: list = None, use_tqdm=True):
     parser = ArgumentParser(
@@ -62,6 +129,23 @@ def main(inargs: list = None, use_tqdm=True):
     parser_c.add_argument('duration', type=float, default=10, help='How many seconds')
     parser_c.set_defaults(func=bake_a_cake)
 
+    # Create the parser for read a file.
+    parser_d = subparsers.add_parser(
+        name='readfile',
+        help='Reads a file.'
+    )
+    parser_d.add_argument('filename', type=Path, help='Which file')
+    parser_d.set_defaults(func=read_a_file)
+
+    # Create the parser for read a file.
+    parser_e = subparsers.add_parser(
+        name='readzip',
+        help='Reads a file inside a ZIP archive.'
+    )
+    parser_e.add_argument('zipfilename', type=Path, help='Which ZIP file?')
+    parser_e.add_argument('innerfilename', type=str, help='File path inside ZIP archive, e.g. subfolder/file1.txt')
+    parser_e.set_defaults(func=read_file_in_zip)
+
     args = parser.parse_args(inargs)
     #if args.subparser_name:
     #    args.func(args)
@@ -71,6 +155,10 @@ def main(inargs: list = None, use_tqdm=True):
         add_two_numbers(*args.numbers)
     elif args.subparser_name == "bake":
         bake_a_cake(use_tqdm=use_tqdm, **args.__dict__)
+    elif args.subparser_name == "readfile":
+        read_a_file(args.filename, use_tqdm=use_tqdm)
+    elif args.subparser_name == "readzip":
+        read_file_in_zip(args.zipfilename, args.innerfilename, use_tqdm=use_tqdm)
     else:
         parser.print_usage()
 
