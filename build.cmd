@@ -1,4 +1,4 @@
 pyinstaller buildall.spec
-pushd mypydemo
+pushd dist
 7z a mypydemo.zip mypydemo
 popd

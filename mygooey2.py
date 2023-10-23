@@ -1,5 +1,5 @@
 from myscript import *
-from gooey import Gooey
+from gooey import Gooey, GooeyParser
 
 @Gooey(
     terminal_font_family='Consolas',
@@ -12,8 +12,8 @@ from gooey import Gooey
     }
 )
 def main_gooey2(inargs: list = None, use_tqdm=False):
-    parser = ArgumentParser(
-        description="Multipurpose tool says hello, adds numbers, bakes cake.",
+    parser = GooeyParser(
+        description="Multipurpose tool with FileChooser.",
         epilog=None
     )
 
@@ -44,7 +44,10 @@ def main_gooey2(inargs: list = None, use_tqdm=False):
         name='bake',
         help='Does something slowly with progress updates.'
     )
-    parser_c.add_argument('duration', type=float, default=10, help='How many seconds')
+    # Gooey Slider widget limitations (as of version 1.0.8.1):
+    # * only allows integer values.
+    # * only works with optional arguments.
+    parser_c.add_argument('--duration', type=float, default=10, help='How many seconds', widget='Slider', gooey_options={"min": 0, "max": 20})
     parser_c.set_defaults(func=bake_a_cake)
 
     # Create the parser for read a file.
@@ -52,7 +55,7 @@ def main_gooey2(inargs: list = None, use_tqdm=False):
         name='readfile',
         help='Reads a file.'
     )
-    parser_d.add_argument('filename', type=Path, help='Which file')
+    parser_d.add_argument('filename', type=Path, help='Which file', widget='FileChooser')
     parser_d.set_defaults(func=read_a_file)
 
     # Create the parser for read a file.
@@ -60,7 +63,7 @@ def main_gooey2(inargs: list = None, use_tqdm=False):
         name='readzip',
         help='Reads a file inside a ZIP archive.'
     )
-    parser_e.add_argument('zipfilename', type=Path, help='Which ZIP file?')
+    parser_e.add_argument('zipfilename', type=Path, help='Which ZIP file?', widget='FileChooser')
     parser_e.add_argument('innerfilename', type=str, help='File path inside ZIP archive, e.g. subfolder/file1.txt')
     parser_e.set_defaults(func=read_file_in_zip)
 
