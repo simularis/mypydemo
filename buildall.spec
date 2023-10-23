@@ -27,7 +27,7 @@ a2 = Analysis(
 )
 MERGE((a1,'myscript','myscript'), (a2, 'mygooey','mygooey'))
 
-for a,name in [(a1,'myscript'), (a2,'mygooey')]:
+for a,name,console in [(a1,'myscript',True), (a2,'mygooey',False)]:
     pyz = PYZ(a.pure)
     exe = EXE(
         pyz,
@@ -39,7 +39,7 @@ for a,name in [(a1,'myscript'), (a2,'mygooey')]:
         bootloader_ignore_signals=False,
         strip=False,
         upx=True,
-        console=True,
+        console=console,
         disable_windowed_traceback=False,
         argv_emulation=False,
         target_arch=None,
