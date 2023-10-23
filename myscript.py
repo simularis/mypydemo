@@ -120,7 +120,7 @@ def main(inargs: list = None, use_tqdm=True):
     parser_b.add_argument('numbers', type=float, nargs=2,
                           help='The numbers you want to add, separated by a space. E.g. 1 2.')
     parser_b.set_defaults(func=add_two_numbers)
-    
+
     # Create the parser for progress bar.
     parser_c = subparsers.add_parser(
         name='bake',
