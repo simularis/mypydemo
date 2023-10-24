@@ -12,6 +12,7 @@ code, and use a command line. If your script requires user interaction or a
 sophisticated user interface, do not use this template.
 
 Here's how this template helps, by demonstrating these useful packages.
+
 * `argparse` - Helps you build a command line interface, so the script can be
 flexible without needing user edits.
 * `Gooey` - Takes a command line interface written for argparse and translates
