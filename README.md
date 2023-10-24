@@ -81,3 +81,15 @@ needed to use those packages into new folders `build` and `dist`. Review those p
 For example, this Pyinstaller identifies `numpy` as a dependency for this project,
 although it is not required. Edit the `.spec` file to exclude those packages by name
 and reduce the size of the build.
+
+## Gallery
+
+Here is how the Python command line script works, after the user has installed python, created an environment, and opened a terminal.
+
+<img src="doc/gallery0.png">
+
+Here is how the user interface works (no installation, no terminal).
+
+<img src="doc/gallery1.png">
+
+<img src="doc/gallery2.png">
